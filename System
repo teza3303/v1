@@ -1,0 +1,35 @@
+ createEndpointSample(project, endpointDisplayName);
+  }
+
+  static void createEndpointSample(String project, String endpointDisplayName)
+      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    EndpointServiceSettings endpointServiceSettings =
+        EndpointServiceSettings.newBuilder()
+            .setEndpoint("us-central1-aiplatform.googleapis.com:443")
+            .build();
+
+    // Initialize client that will be used to send requests. This client only needs to be created
+    // once, and can be reused for multiple requests. After completing all of your requests, call
+    // the "close" method on the client to safely clean up any remaining background resources.
+    try (EndpointServiceClient endpointServiceClient =
+        EndpointServiceClient.create(endpointServiceSettings)) {
+      String location = "us-central1";
+      LocationName locationName = LocationName.of(project, location);
+      Endpoint endpoint = Endpoint.newBuilder().setDisplayName(endpointDisplayName).build();
+
+      OperationFuture<Endpoint, CreateEndpointOperationMetadata> endpointFuture =
+          endpointServiceClient.createEndpointAsync(locationName, endpoint);
+      System.out.format("Operation name: %s\n", endpointFuture.getInitialFuture().get().getName());
+      System.out.println("Waiting for operation to finish...");
+      Endpoint endpointResponse = endpointFuture.get(300, TimeUnit.SECONDS);
+
+      System.out.println("Create Endpoint Response");
+      System.out.format("Name: %s\n", endpointResponse.getName());
+      System.out.format("Display Name: %s\n", endpointResponse.getDisplayName());
+      System.out.format("Description: %s\n", endpointResponse.getDescription());
+      System.out.format("Labels: %s\n", endpointResponse.getLabelsMap());
+      System.out.format("Create Time: %s\n", endpointResponse.getCreateTime());
+      System.out.format("Update Time: %s\n", endpointResponse.getUpdateTime());
+    }
+  }
+}
